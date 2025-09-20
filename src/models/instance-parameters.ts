@@ -2,7 +2,7 @@ import type { Holiday } from "./holiday";
 import type { Period } from "./period";
 import type { WeekFrequency } from "./week-frequency";
 
-export type InstanceParameters = Readonly<{
+export type InstanceParameters = {
   hyperplanning?: Boolean
   nextBusinessDay: Date
   firstMonday: Date
@@ -21,4 +21,5 @@ export type InstanceParameters = Readonly<{
   weekFrequencies: Map<number, WeekFrequency>
   blocksPerDay: number
   info?: any
-}>;
+};
+

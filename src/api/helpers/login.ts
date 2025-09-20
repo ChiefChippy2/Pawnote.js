@@ -27,7 +27,7 @@ const BASE_PARAMS = {
  * @param auth - The authentication details including URL, username, password, account kind, device UUID, and optional navigator identifier.
  * @returns A promise resolving to the refreshed session information.
  */
-export const loginCredentials = async (session: SessionHandle, auth: PasswordAuthenticationParams, forceCompression: boolean, forceEncryption: boolean): Promise<RefreshInformation> => {
+export const loginCredentials = async (session: SessionHandle, auth: PasswordAuthenticationParams, forceCompression?: boolean, forceEncryption?: boolean): Promise<RefreshInformation> => {
   const base = cleanURL(auth.url);
 
   const { information, version } = await sessionInformation({
