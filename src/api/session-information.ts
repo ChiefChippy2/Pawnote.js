@@ -26,7 +26,9 @@ export const sessionInformation = async (options: {
   };
   setCookiesArrayToRequest(request, options.cookies);
   console.log(request.url);
-  const { content: html, headers } = await fetcher(request);
+  const resp = await fetcher(request);
+  const { content: html, headers } = resp;
+  if (!(headers instanceof Headers)) throw new PageUnavailableError();
   let version = headers?.get("server")?.toString?.()?.match?.(HEADER_VERSION_REGEX)?.groups?.version?.split?.(".")?.map?.(Number);
   if (!version) version = html.match(VERSION_FROM_HTML_REGEX)?.groups?.version?.split(".").map(Number);
   if (!version) throw new PageUnavailableError();
