@@ -56,6 +56,7 @@ export class ResponseFN {
       }
     }
     catch (error) {
+      if(process.env.DEBUG) console.log(content);
       if (content.includes("La page a expir")) {
         throw new SessionExpiredError();
       }

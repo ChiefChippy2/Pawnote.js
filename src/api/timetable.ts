@@ -8,7 +8,11 @@ import { apiProperties } from "./private/api-properties";
 
 const timetable = async (session: SessionHandle, additional = {}): Promise<Timetable> => {
   const properties = apiProperties(session);
-
+  let resource = {};
+  try {
+    resource = propertyCaseInsensitive("ressource", encodeUserResource(session.userResource));
+  }
+  catch(e) {};
   const request = new RequestFN(session, "PageEmploiDuTemps", {
     [properties.signature]: { onglet: TabLocation.Timetable },
 
@@ -28,7 +32,7 @@ const timetable = async (session: SessionHandle, additional = {}): Promise<Timet
 
       edt: { G: 16, L: "Emploi du temps" },
 
-      ...propertyCaseInsensitive("ressource", encodeUserResource(session.userResource)),
+      ...resource,
       ...additional
     }
   });

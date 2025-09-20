@@ -1,26 +1,34 @@
 import { defaultFetcher, type Fetcher, type Request, setCookiesArrayToRequest } from "@literate.ink/utilities";
 import { decodeSessionInformation } from "~/decoders/session-information";
 import { encodeAccountKindToPath } from "~/encoders/account-kind";
-import { BusyPageError, PageUnavailableError, SuspendedIPError, type AccountKind, type SessionInformation } from "~/models";
+import { AccountKind, BusyPageError, PageUnavailableError, SuspendedIPError, type SessionInformation } from "~/models";
 
 const VERSION_FROM_HTML_REGEX = />PRONOTE (?<version>\d+\.\d+\.\d+)/;
+const HEADER_VERSION_REGEX = /(?<version>\d+\.\d+\.\d+)/;
 
 export const sessionInformation = async (options: {
-  base: string
+  base: string,
   kind: AccountKind,
   params: Record<string, any>,
-  cookies: string[]
+  cookies: string[],
+  mustRespectGivenURL?: boolean,
+  forceCompression?: boolean,
+  forceEncryption?: boolean
 }, fetcher: Fetcher = defaultFetcher) => {
-  const url = new URL(options.base + "/" + encodeAccountKindToPath(options.kind));
+  const url = new URL(options.base + encodeAccountKindToPath(options.kind));
   for (const [key, value] of Object.entries(options.params)) {
     url.searchParams.set(key, value);
   }
 
-  const request: Request = { url, redirect: "manual" };
+  const request: Request = {
+    url: options?.mustRespectGivenURL ? new URL(options.base): url,
+    redirect: "manual"
+  };
   setCookiesArrayToRequest(request, options.cookies);
-
-  const { content: html } = await fetcher(request);
-  const version = html.match(VERSION_FROM_HTML_REGEX)?.groups?.version?.split(".").map(Number);
+  console.log(request.url);
+  const { content: html, headers } = await fetcher(request);
+  let version = headers?.get("server")?.toString?.()?.match?.(HEADER_VERSION_REGEX)?.groups?.version?.split(".").map(Number);
+  if (!version) version = html.match(VERSION_FROM_HTML_REGEX)?.groups?.version?.split(".").map(Number);
   if (!version) throw new PageUnavailableError();
 
   try {
@@ -40,9 +48,9 @@ export const sessionInformation = async (options: {
     const session_data_string = relaxed_data
       .replace(/(['"])?([a-z0-9A-Z_]+)(['"])?:/gu, "\"$2\": ")
       .replace(/'/gu, "\"");
-
     return {
-      information: decodeSessionInformation(JSON.parse(session_data_string), options.base, version),
+      information: decodeSessionInformation(JSON.parse(session_data_string), options.base, version,
+        {forceCompression: options.forceCompression || false, forceEncryption: options.forceEncryption || false}),
       version
     };
   }

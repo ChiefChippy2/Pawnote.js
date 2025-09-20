@@ -1,3 +1,6 @@
 node_modules/
 dist/
 docs/
+test/
+bun.lock
+package-lock.json

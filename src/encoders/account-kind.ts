@@ -13,7 +13,9 @@ export const encodeAccountKindToPath = (kind: AccountKind): string => {
     case AccountKind.TEACHER:
       name = "professeur";
       break;
+    case AccountKind.HYPERPLANNING:
+      return "/invite";
   }
 
-  return `mobile.${name}.html`;
+  return `/mobile.${name}.html`;
 };

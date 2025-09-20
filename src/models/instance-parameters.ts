@@ -3,10 +3,12 @@ import type { Period } from "./period";
 import type { WeekFrequency } from "./week-frequency";
 
 export type InstanceParameters = Readonly<{
+  hyperplanning?: Boolean
   nextBusinessDay: Date
   firstMonday: Date
   firstDate: Date
   lastDate: Date
+  hasAuthentication?: Boolean
 
   /**
    * Allows to recognize the device for next authentications.
@@ -18,4 +20,5 @@ export type InstanceParameters = Readonly<{
   holidays: Holiday[]
   weekFrequencies: Map<number, WeekFrequency>
   blocksPerDay: number
+  info?: any
 }>;

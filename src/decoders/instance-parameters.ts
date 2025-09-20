@@ -5,6 +5,10 @@ import { decodeHoliday } from "./holiday";
 import { decodePeriod } from "./period";
 
 export const decodeInstanceParameters = (parameters: any): InstanceParameters => {
+  if (parameters?.parametreGeneral?.avecAuthentification === false) {
+    // HYPERPLANNING handling
+    return hyperplanningDecodeIP(parameters);
+  }
   const weekFrequencies = new Map<number, WeekFrequency>();
 
   for (const fortnight of [1, 2]) {
@@ -18,6 +22,7 @@ export const decodeInstanceParameters = (parameters: any): InstanceParameters =>
   }
 
   return {
+    hasAuthentication: true,
     version: parameters.General.versionPN.split(".").map(Number),
     nextBusinessDay: decodePronoteDate(parameters.General.JourOuvre.V),
     firstMonday: decodePronoteDate(parameters.General.PremierLundi.V),
@@ -30,5 +35,25 @@ export const decodeInstanceParameters = (parameters: any): InstanceParameters =>
     holidays: parameters.General.listeJoursFeries.V.map(decodeHoliday),
     weekFrequencies,
     blocksPerDay: parameters.General.PlacesParJour
+  };
+};
+
+const hyperplanningDecodeIP = (parameters: any): InstanceParameters => {
+  return {
+    hyperplanning: true,
+    hasAuthentication: false,
+    version: parameters.parametreGeneral.Version.V.split(" ")[1].split(".").map(Number),
+    nextBusinessDay: new Date(),
+    firstMonday: decodePronoteDate(parameters.parametreGeneral.PremierLundi.V),
+    firstDate: decodePronoteDate(parameters.parametreGeneral.PremierLundi.V), //Unsure why PremiereDate isn't a thing
+    lastDate: decodePronoteDate(parameters.parametreGeneral.DerniereDate.V),
+
+    navigatorIdentifier: parameters.identifiantNav,
+    endings: [],
+    periods: [],
+    // holidays: JSON.parse(parameters.parametreGeneral.JoursFeries.V).map(decodeHoliday),
+    weekFrequencies: new Map(),
+    holidays: [],
+    blocksPerDay: parameters.parametreGeneral.PlacesParJour
   };
 };

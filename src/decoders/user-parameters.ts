@@ -14,7 +14,9 @@ export const decodeUserParameters = (parameters: any, session: SessionHandle): U
       resources = parameters.ressource.listeRessources;
       break;
   }
+  session.instance.info = parameters;
 
+  if (session.instance.hyperplanning) return {};
   return {
     id: parameters.ressource.N,
     kind: parameters.ressource.G,

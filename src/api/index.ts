@@ -53,3 +53,4 @@ export * from "./security-save";
 export * from "./security-source";
 export * from "./session-information";
 export * from "./timetable";
+export * from "~/core/request-function";

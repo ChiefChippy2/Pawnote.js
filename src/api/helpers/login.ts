@@ -27,7 +27,7 @@ const BASE_PARAMS = {
  * @param auth - The authentication details including URL, username, password, account kind, device UUID, and optional navigator identifier.
  * @returns A promise resolving to the refreshed session information.
  */
-export const loginCredentials = async (session: SessionHandle, auth: PasswordAuthenticationParams): Promise<RefreshInformation> => {
+export const loginCredentials = async (session: SessionHandle, auth: PasswordAuthenticationParams, forceCompression: boolean, forceEncryption: boolean): Promise<RefreshInformation> => {
   const base = cleanURL(auth.url);
 
   const { information, version } = await sessionInformation({
@@ -38,13 +38,16 @@ export const loginCredentials = async (session: SessionHandle, auth: PasswordAut
       ...BASE_PARAMS,
       // bypasss delegation
       bydlg: "A6ABB224-12DD-4E31-AD3E-8A39A1C2C335"
-    }
+    },
+    forceCompression,
+    forceEncryption
   }, session.fetcher);
 
   session.information = information;
   session.instance = <InstanceParameters>{ version };
   session.instance = await instanceParameters(session, auth.navigatorIdentifier);
 
+  if (!session.instance.hasAuthentication) return finishLoginManually(session, {}, {});
   const identity = await identify(session, {
     username: auth.username,
     deviceUUID: auth.deviceUUID,
@@ -300,11 +303,11 @@ const hasSecurityModal = (authentication: any): boolean => Boolean(authenticatio
  */
 export const finishLoginManually = async (session: SessionHandle, authentication: any, identity: any, initialUsername?: string): Promise<RefreshInformation> => {
   session.user = await userParameters(session);
-  use(session, 0); // default to first resource.
+  if(!session.instance.hyperplanning) use(session, 0); // default to first resource.
 
   return {
-    token: authentication.jetonConnexionAppliMobile,
-    username: identity.login ?? initialUsername,
+    token: authentication?.jetonConnexionAppliMobile,
+    username: identity?.login ?? initialUsername,
     kind: session.information.accountKind,
     url: session.information.url,
     navigatorIdentifier: session.instance.navigatorIdentifier
